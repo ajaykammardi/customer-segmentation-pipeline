@@ -15,7 +15,13 @@ def clean_data(df):
     df['age'] = df['age'].fillna(df['age'].median())
     df['income'] = df['income'].fillna(df['income'].median())
     df['amount'] = df['amount'].fillna(0)
-    df['date'] = pd.to_datetime(df['date'], errors='coerce')
+    
+    df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d', errors='coerce')
+
+    # Fill any rows that failed with a second parse (assuming those might be Y-M-D)
+    mask_failed = df['date'].isna()
+    df.loc[mask_failed, 'date'] = pd.to_datetime( df.loc[mask_failed, 'date'], format='%d-%m-%Y', errors='coerce')
+
     return df
 
 def feature_engineering(df):
@@ -29,14 +35,22 @@ def feature_engineering(df):
     })
     agg.columns = ['clv', 'avg_purchase_amount', 'max_purchase_amount', 'min_purchase_amount',
                    'purchase_count', 'last_purchase', 'first_purchase', 'age', 'income', 'gender']
-    agg['last_purchase_days_ago'] = (today - agg['last_purchase']).dt.days
+    
+    agg['days_since_last_purchase'] = (today - agg['last_purchase']).dt.days
     agg['purchase_frequency'] = agg['purchase_count'] / ((agg['last_purchase'] - agg['first_purchase']).dt.days / 30.0).replace(0, 1)
+
+    agg['days_since_first_purchase'] = (today - agg['first_purchase']).dt.days
+    
+    print(len(agg))
+    agg = agg.dropna()
+    print(len(agg))
+    
     return agg.reset_index()
 
 def feature_normalization(df):
     scaler = StandardScaler()
     df['gender'] = LabelEncoder().fit_transform(df['gender'].astype(str))
-    cols = ['age', 'income', 'clv', 'avg_purchase_amount', 'purchase_count', 'last_purchase_days_ago', 'purchase_frequency']
+    cols = ['age', 'income', 'clv', 'avg_purchase_amount', 'purchase_count', 'days_since_last_purchase', 'purchase_frequency']
     return df, scaler.fit_transform(df[cols])
 
 def customer_segmenation(scaled_data, n_clusters=3):
@@ -84,9 +98,9 @@ def aggregate_purchase_trends(df):
 def main():
     df = pd.read_csv(INPUT_FILE)
     df = clean_data(df)
-    df = feature_engineering(df)
+    featured_df = feature_engineering(df)
     
-    features, features_scaled = feature_normalization(df)
+    features, features_scaled = feature_normalization(featured_df)
     segments = customer_segmenation(features_scaled)
 
     features_with_segments, segment_metrics = aggregate_segment_metrics(features, segments)

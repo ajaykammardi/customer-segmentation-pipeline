@@ -6,9 +6,15 @@ import os
 load_dotenv()
 
 def get_engine():
-    return create_engine(
-        f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
-    )
+    # Use environment variables; fallback defaults can help debugging locally
+    db_user = os.getenv("DB_USER", "postgres")
+    db_pass = os.getenv("DB_PASSWORD", "postgres")
+    db_host = os.getenv("DB_HOST", "localhost")          # 'db' matches service name in docker-compose
+    db_port = os.getenv("DB_PORT", "5432")
+    db_name = os.getenv("DB_NAME", "customer_reporting")
+
+    url = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+    return create_engine(url)
 
 def load_to_db():
     engine = get_engine()

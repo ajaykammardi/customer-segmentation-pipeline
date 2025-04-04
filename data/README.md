@@ -1,4 +1,4 @@
-## 🧬 Customer Data Generation
+## Customer Data Generation
 
 To simulate customer profiles, run the script below to generate a CSV file of synthetic data.
 
@@ -17,6 +17,4 @@ Make sure your environment is activated and required packages are installed (`fa
 ```bash
 pip install -r requirements.txt
 
-```bash
 python generate_customers_data.py --rows 200 --output customers_profiles.csv --duplicate_ratio 0.1 --missing_ratio 0.2
-
