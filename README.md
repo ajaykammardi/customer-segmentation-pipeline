@@ -116,7 +116,7 @@ customer-segmentation-pipeline/
 
 ---
 
-## 🚀 Setup & Usage
+## Setup & Usage
 
 ### 1. **Install Python Requirements** (Local)
 
@@ -141,25 +141,25 @@ docker-compose up --build -d
 From the project root (`customer-segmentation-pipeline/`):
 
 ```bash
-# 4a. Start Docker if not started already
+# 3a. Start Docker if not started already
 make docker-up
 
-# 4b. Generate synthetic customer data
+# 3b. Generate synthetic customer data
 make generate
 
-# 4c. Extract CSV + API data
+# 3c. Extract CSV + API data
 make extract
 
-# 4d. Transform: clean, engineer features, cluster
+# 3d. Transform: clean, engineer features, cluster
 make transform
 
-# 4e. Load results into Postgres
+# 3e. Load results into Postgres
 make load
 
-# 4f. Run the entire pipeline at once
+# 3f. Run the entire pipeline at once
 make run-all
 
-# 4g. Test
+# 3g. Test
 make test
 ```
 
