@@ -23,3 +23,7 @@ def load_to_db():
     for file_path, table in files_to_tables.items():
         print(f"Loading {table}")
         pd.read_csv(file_path).to_sql(table, engine, if_exists="replace", index=False)
+
+# Optional: standalone testable main
+if __name__ == "__main__":
+    load_to_db()

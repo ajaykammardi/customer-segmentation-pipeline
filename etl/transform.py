@@ -3,6 +3,13 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.cluster import KMeans
 import numpy as np
 
+INPUT_FILE = "data/joined_data.csv"
+OUTPUT_SEGMENTS_FILE = "data/customer_segments.csv"
+OUTPUT_METRICS_FILE = "data/segment_metrics.csv"
+OUTPUT_CUSTOMER_BEHAVIOR_METRICS_FILE = "data/customer_behavior_metrics.csv"
+OUTPUT_CUSTOMER_STORE_METRICS_FILE = "data/customer_store_summary.csv"
+OUTPUT_PURCHASE_TRENDS_FILE = "data/customer_purchase_trends.csv"
+
 def clean_data(df):
     df = df.drop_duplicates()
     df['age'] = df['age'].fillna(df['age'].median())
@@ -32,7 +39,7 @@ def feature_normalization(df):
     cols = ['age', 'income', 'clv', 'avg_purchase_amount', 'purchase_count', 'last_purchase_days_ago', 'purchase_frequency']
     return df, scaler.fit_transform(df[cols])
 
-def customer_segmenation(scaled_data, n_clusters=4):
+def customer_segmenation(scaled_data, n_clusters=3):
     model = KMeans(n_clusters=n_clusters, random_state=42)
     return model.fit_predict(scaled_data)
 
@@ -73,3 +80,33 @@ def aggregate_purchase_trends(df):
     }).reset_index()
     monthly.columns = ["mobile", "month", "total_spent", "num_purchases"]
     return monthly
+
+def main():
+    df = pd.read_csv(INPUT_FILE)
+    df = clean_data(df)
+    df = feature_engineering(df)
+    
+    features, features_scaled = feature_normalization(df)
+    segments = customer_segmenation(features_scaled)
+
+    features_with_segments, segment_metrics = aggregate_segment_metrics(features, segments)
+    aggregate_behavior_metrics_df = aggregate_behavior_metrics(df)
+    aggregate_store_summary_df = aggregate_store_summary(df)
+    aggregate_purchase_trends_df = aggregate_purchase_trends(df)
+
+    # Save output
+    features_with_segments.to_csv(OUTPUT_SEGMENTS_FILE, index=False)
+    segment_metrics.to_csv(OUTPUT_METRICS_FILE, index=False)
+    aggregate_behavior_metrics_df.to_csv(OUTPUT_CUSTOMER_BEHAVIOR_METRICS_FILE, index=False)
+    aggregate_store_summary_df.to_csv(OUTPUT_CUSTOMER_STORE_METRICS_FILE, index=False)
+    aggregate_purchase_trends_df.to_csv(OUTPUT_PURCHASE_TRENDS_FILE, index=False)
+
+    print("Segment data and metrics saved to:")
+    print(f"- {OUTPUT_SEGMENTS_FILE}")
+    print(f"- {OUTPUT_METRICS_FILE}")
+    print(f"- {OUTPUT_CUSTOMER_BEHAVIOR_METRICS_FILE}")
+    print(f"- {OUTPUT_CUSTOMER_STORE_METRICS_FILE}")
+    print(f"- {OUTPUT_PURCHASE_TRENDS_FILE}")
+
+if __name__ == "__main__":
+    main()

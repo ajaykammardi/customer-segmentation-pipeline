@@ -1,3 +1,5 @@
+#Sample code on how the whole steps can be executed as Airflow DAG
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
