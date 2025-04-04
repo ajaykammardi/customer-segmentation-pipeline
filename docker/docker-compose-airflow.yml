@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # POSTGRES for Airflow + your main DB
+  # ─────────────────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15
+    container_name: airflow_postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow_db
+    ports:
+      - "5433:5432"       # Expose on 5433 to not clash with your existing compose
+    volumes:
+      - airflow_pgdata:/var/lib/postgresql/data
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # AIRFLOW-WEBSERVER
+  # ─────────────────────────────────────────────────────────────────────────────
+  airflow-webserver:
+    image: apache/airflow:2.9.3
+    container_name: airflow_web
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow_db
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__WEBSERVER__PORT: 8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../dags:/opt/airflow/dags        # maps your local 'dags/' to Airflow
+      - ../logs:/opt/airflow/logs        # logs
+      - ../plugins:/opt/airflow/plugins  # optional plugins
+    command: >
+      bash -c 'airflow db upgrade &&
+               airflow users create --username admin --password admin
+               --firstname admin --lastname admin --role Admin --email admin@example.com &&
+               airflow webserver'
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # AIRFLOW-SCHEDULER
+  # ─────────────────────────────────────────────────────────────────────────────
+  airflow-scheduler:
+    image: apache/airflow:2.9.3
+    container_name: airflow_scheduler
+    restart: always
+    depends_on:
+      - airflow-webserver
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow_db
+    volumes:
+      - ../dags:/opt/airflow/dags
+      - ../logs:/opt/airflow/logs
+      - ../plugins:/opt/airflow/plugins
+    command: airflow scheduler
+
+volumes:
+  airflow_pgdata:

@@ -1,0 +1,20 @@
+FROM python:3.10
+
+# Create and switch to app directory
+WORKDIR /app
+
+# Copy your FastAPI code
+# Assuming your code is in a folder named `api/`
+COPY ./api ./api
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expose port 8000 inside container
+EXPOSE 8000
+
+# Start FastAPI app
+CMD ["uvicorn", "api.purchase_history_api:app", "--host", "0.0.0.0", "--port", "8000"]
