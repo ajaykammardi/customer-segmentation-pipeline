@@ -91,7 +91,7 @@ customer-segmentation-pipeline/
    ... (etc. for behavior_metrics, store_summary, purchase_trends)
    ```
 
-### Report Tables Summaries
+#### Report Tables Summaries
 
 - **customer_segments**  
   Per-customer records with demographic info (age, income, gender), computed features (CLV, purchase frequency), and assigned cluster segment.
