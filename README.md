@@ -35,6 +35,7 @@ customer-segmentation-pipeline/
 │   └── test_etl.py                 # Basic test suite
 ├── dags/                           # (Optional) Airflow DAG for orchestration
 │   └── customer_etl_pipeline.py
+├── .env                            # Environment variables (DB_HOST, DB_USER, etc.)
 ├── Makefile                        # Shortcut commands (generate, extract, transform, load, test)
 ├── requirements.txt                # Python dependencies
 └── README.md                       # You're here!
@@ -106,48 +107,6 @@ customer-segmentation-pipeline/
 
 - **customer_purchase_trends**  
   Time-based monthly aggregates of spend and purchase counts per customer.
-
----
-
-## Testing
-- Basic test file in `tests/test_etl.py` checks data existence and quick logic validation.
-
-## Optional Airflow DAG
-- Found in `dags/customer_etl_pipeline.py`.
-- Schedules or orchestrates the steps: generate → extract → transform → load.
-- Useful for production scheduling or advanced monitoring.
-
----
-
-## ⚙️ Assumptions & Simplifications
-
-1. **KMeans Clusters**  
-   - Hard-coded to **3 or 4** clusters; no advanced hyperparameter tuning or elbow plots. Deeper cluster analysis (e.g., PCA, silhouette scores) can be added if needed.
-2. **Data Size**  
-   - Uses **pandas**, suitable for small to medium data sets. For truly large data, consider **Polars** or **Apache Spark**.
-3. **Data Generation**  
-   - Simple random approach using `faker`. Real production might use real data or more domain-specific patterns.
-4. **Data Quality**  
-   - Minimal validations (imputation, removing missing `mobile`) — no deep business rules.
-5. **Environment**  
-   - Project is run via **Makefile** commands for simplicity.  
-   - Docker Compose config assumes `db` service name for Postgres. If running locally (outside Docker), set `DB_HOST=localhost`.
-6. **ETL**  
-   - No orchestrator used by default, but a sample **Airflow** DAG is provided.
-7. **Dockerizable ETL**  
-   - The entire ETL (extract.py, transform.py, load.py) can also be wrapped in a Dockerfile and run as a container if desired.
-
----
-
-## 🚀 Setup & Usage
-
-### 1. **Install Python 3.10** (Local)
-
-If you don’t have Python 3.10+, download it from [Python.org](https://www.python.org/downloads/) or use pyenv.
-
-```bash
-pip install -r requirements.txt
-
 
 5. **Testing**  
    - Basic test file in `tests/test_etl.py` checks data existence and quick logic validation.
